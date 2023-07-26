@@ -101,9 +101,9 @@ struct Renderer
 			maxP = std::max(maxP, f.p[i]);
 		}
 
-		for (int j = 0; j < img_size_y; j++) {
-			for (int i = 0; i < img_size_x; i++) {
-				auto s = scene.fluid->s[img_size_x * j + i];
+		for (int i = 0; i < img_size_x; i++) {
+			for (int j = 0; j < img_size_y; j++) {
+				auto s = scene.fluid->m[img_size_y * i + j];
 				//auto color = getSciColor(p, minP, maxP);
 				img_data[4 * (img_size_x * j + i) + 0] = (unsigned char)(255 * s);
 				img_data[4 * (img_size_x * j + i) + 1] = (unsigned char)(255 * s);
