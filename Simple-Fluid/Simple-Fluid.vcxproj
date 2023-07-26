@@ -142,7 +142,9 @@
     <ClCompile Include="tool\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="fluid\fluid.hpp" />
     <ClInclude Include="renderer\renderer.hpp" />
+    <ClInclude Include="scene\scene.hpp" />
     <ClInclude Include="tool\camera.h" />
     <ClInclude Include="tool\stb_image.h" />
     <ClInclude Include="tool\svpng.h" />

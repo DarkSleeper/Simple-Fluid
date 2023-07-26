@@ -10,6 +10,7 @@
 #include <vector>
 #include <stdlib.h>
 #include <time.h>
+#include "../scene/scene.hpp"
 
 #define STEP 1
 #define SCR_WIDTH 1280
@@ -21,12 +22,10 @@ struct Renderer
 {
 	Renderer() 
 	{
-		img_size = SCR_WIDTH * SCR_HEIGHT * 4;
 		srand(time(0));
 	}
 	
 	~Renderer() {
-		delete img_data;
 	}
 
 	bool init() {
@@ -34,8 +33,13 @@ struct Renderer
 			return (float)(rand()) / RAND_MAX;
 		};
 
+		// scene
+		setupScene(scene, 1);
+
 		// image
-		img_data = new unsigned char[img_size];
+		img_size_x = scene.fluid->numX;
+		img_size_y = scene.fluid->numY;
+		img_data.resize(img_size_x * img_size_y * 4, (unsigned char)0);
 		glGenTextures(1, &texture);
 
 		// shader
@@ -85,31 +89,36 @@ struct Renderer
 	}
 
 	void render(float dt, glm::mat4& world_to_view_matrix, glm::mat4& view_to_clip_matrix) {
-		// prepare funcs
-		auto setMat4 = [&](const GLuint& program, const std::string& name, const glm::mat4& mat) -> void {
-			glUniformMatrix4fv(glGetUniformLocation(program, name.c_str()), 1, GL_FALSE, &mat[0][0]);
-		};
-		auto setVec3 = [&](const GLuint& program, const std::string& name, const glm::vec3& value) -> void {
-			glUniform3fv(glGetUniformLocation(program, name.c_str()), 1, &value[0]);
-		};
-		auto setVec3Ary = [&](const GLuint& program, const std::string& name, const int& count, const glm::vec3& value) -> void {
-			glUniform3fv(glGetUniformLocation(program, name.c_str()), count, &value[0]);
-		};
 
-		for (int i = 0; i < img_size / 4; i++) {
-			img_data[4 * i + 0] = (unsigned char)(255);
-			img_data[4 * i + 1] = (unsigned char)(255);
-			img_data[4 * i + 2] = (unsigned char)(90);
-			img_data[4 * i + 3] = (unsigned char)(255);
+		simulate(scene);
+
+		auto& f = *scene.fluid.get();
+		auto minP = f.p[0];
+		auto maxP = f.p[0];
+
+		for (int i = 0; i < f.numCells; i++) {
+			minP = std::min(minP, f.p[i]);
+			maxP = std::max(maxP, f.p[i]);
+		}
+
+		for (int j = 0; j < img_size_y; j++) {
+			for (int i = 0; i < img_size_x; i++) {
+				auto s = scene.fluid->s[img_size_x * j + i];
+				//auto color = getSciColor(p, minP, maxP);
+				img_data[4 * (img_size_x * j + i) + 0] = (unsigned char)(255 * s);
+				img_data[4 * (img_size_x * j + i) + 1] = (unsigned char)(255 * s);
+				img_data[4 * (img_size_x * j + i) + 2] = (unsigned char)(255 * s);
+				img_data[4 * (img_size_x * j + i) + 3] = (unsigned char)(255);
+			}
 		}
 
 		// image upload
 		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, img_data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img_size_x, img_size_y, 0, GL_RGBA, GL_UNSIGNED_BYTE, &img_data[0]);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		
 		/* Render here */
@@ -123,13 +132,35 @@ struct Renderer
 	}
 
 private:
-	int img_size;
-	unsigned char* img_data;
+	int img_size_x;
+	int img_size_y;
+	std::vector<unsigned char> img_data;
 	GLuint texture;
 	GLuint vao[1];
 	GLuint vbo[2];
 	GLuint ebo;
 	GLuint renderingProgram;
+
+	Scene scene;
+
+	glm::vec4 getSciColor(float val, float minVal, float maxVal) {
+		val = std::min(std::max(val, minVal), maxVal - 0.1f);
+		auto d = maxVal - minVal;
+		val = (d == 0.0) ? 0.5 : ((val - minVal) / d);
+		auto m = 0.25;
+		auto num = (int)floor(val / m);
+		auto s = (val - num * m) / m;
+		float r, g, b;
+
+		switch (num) {
+			case 0: r = 0.0; g = s; b = 1.0; break;
+			case 1: r = 0.0; g = 1.0; b = 1.0 - s; break;
+			case 2: r = s; g = 1.0; b = 0.0; break;
+			case 3: r = 1.0; g = 1.0 - s; b = 0.0; break;
+		}
+
+		return glm::vec4(255 * r, 255 * g, 255 * b, 255);
+	}
 
 	// utility function for checking shader compilation/linking errors.
 	// ------------------------------------------------------------------------

@@ -19,6 +19,12 @@
     <Filter Include="源文件\renderer">
       <UniqueIdentifier>{c54b4f2a-a189-46d2-9a58-caa3fbdb1911}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\fluid">
+      <UniqueIdentifier>{3423fe27-f844-4c75-97c8-6cd168f04b30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\scene">
+      <UniqueIdentifier>{aabe3f0e-1aef-47fc-8d1f-a40ec2a6db32}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -43,6 +49,12 @@
     </ClInclude>
     <ClInclude Include="renderer\renderer.hpp">
       <Filter>源文件\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\scene.hpp">
+      <Filter>源文件\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="fluid\fluid.hpp">
+      <Filter>源文件\fluid</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
