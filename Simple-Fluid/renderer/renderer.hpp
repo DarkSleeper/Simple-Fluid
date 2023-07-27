@@ -103,12 +103,36 @@ struct Renderer
 
 		for (int i = 0; i < img_size_x; i++) {
 			for (int j = 0; j < img_size_y; j++) {
-				auto s = scene.fluid->m[img_size_y * i + j];
-				//auto color = getSciColor(p, minP, maxP);
-				img_data[4 * (img_size_x * j + i) + 0] = (unsigned char)(255 * s);
-				img_data[4 * (img_size_x * j + i) + 1] = (unsigned char)(255 * s);
-				img_data[4 * (img_size_x * j + i) + 2] = (unsigned char)(255 * s);
-				img_data[4 * (img_size_x * j + i) + 3] = (unsigned char)(255);
+				auto color = glm::vec4();
+
+				if (scene.showPressure) {
+					auto p = f.p[i * img_size_y + j];
+					auto s = f.m[i * img_size_y + j];
+					color = getSciColor(p, minP, maxP);
+					if (scene.showSmoke) {
+						color[0] = std::max(0.0f, color[0] - 255 * s);
+						color[1] = std::max(0.0f, color[1] - 255 * s);
+						color[2] = std::max(0.0f, color[2] - 255 * s);
+					}
+				}
+				else if (scene.showSmoke) {
+					auto s = f.m[i * img_size_y + j];
+					color[0] = 255 * s;
+					color[1] = 255 * s;
+					color[2] = 255 * s;
+					if (scene.sceneNr == 2)
+						color = getSciColor(s, 0.0, 1.0);
+				}
+				else if (f.s[i * img_size_y + j] == 0.0) {
+					color[0] = 0;
+					color[1] = 0;
+					color[2] = 0;
+				}
+
+				img_data[4 * (img_size_x * j + i) + 0] = (unsigned char)(color.r);
+				img_data[4 * (img_size_x * j + i) + 1] = (unsigned char)(color.g);
+				img_data[4 * (img_size_x * j + i) + 2] = (unsigned char)(color.b);
+				img_data[4 * (img_size_x * j + i) + 3] = (unsigned char)(color.a);
 			}
 		}
 
