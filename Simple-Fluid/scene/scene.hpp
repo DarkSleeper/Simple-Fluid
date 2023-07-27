@@ -85,10 +85,10 @@ inline void setupScene(Scene& scene, int sceneNr = 0)
 
 	auto res = 100;
 
-	if (sceneNr == 0)
-		res = 50;
-	else if (sceneNr == 3)
-		res = 200;
+	//if (sceneNr == 0)
+	//	res = 50;
+	//else if (sceneNr == 3)
+	//	res = 200;
 
 	auto domainHeight = 1.0f;
 	auto domainWidth = domainHeight / SIM_HEIGHT * SIM_WIDTH;
