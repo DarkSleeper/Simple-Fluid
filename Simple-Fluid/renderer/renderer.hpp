@@ -155,6 +155,8 @@ struct Renderer
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	}
 
+	Scene scene;
+
 private:
 	int img_size_x;
 	int img_size_y;
@@ -164,8 +166,6 @@ private:
 	GLuint vbo[2];
 	GLuint ebo;
 	GLuint renderingProgram;
-
-	Scene scene;
 
 	glm::vec4 getSciColor(float val, float minVal, float maxVal) {
 		val = std::min(std::max(val, minVal), maxVal - 0.1f);

@@ -17,11 +17,15 @@ float lastX = (float)SCR_WIDTH / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
 bool firstMouse = true;
 float speed = 0.016f;
+bool reset_obstacle = true;
+GLFWwindow* window;
+Renderer renderer;
 
 void onKeyPress(GLFWwindow* window, int key, int scancode, int action, int mods);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void processInput(GLFWwindow* window);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
 int main(int argc, char* argv[]) {
 	/* Initialize the library */
@@ -32,8 +36,6 @@ int main(int argc, char* argv[]) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_CORE_PROFILE, GLFW_OPENGL_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-
-	GLFWwindow* window;
 
 	/* Create a windowed mode window and its OpenGL context */
 	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Heat", NULL, NULL);
@@ -48,7 +50,8 @@ int main(int argc, char* argv[]) {
 
 	glfwSetKeyCallback(window, onKeyPress);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetCursorPosCallback(window, mouse_callback); 
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 
 	// glad: load all OpenGL function pointers
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -57,7 +60,6 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	Renderer renderer;
 	renderer.init();
 
 	// timing
@@ -146,6 +148,15 @@ void processInput(GLFWwindow* window)
 		camera.ProcessKeyboard(LEFT, speed);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.ProcessKeyboard(RIGHT, speed);
+
+	if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS)
+		setupScene(renderer.scene, 0);
+	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+		setupScene(renderer.scene, 1);
+	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+		setupScene(renderer.scene, 2);
+	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+		setupScene(renderer.scene, 3);
 }
 
 
@@ -156,6 +167,35 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	// make sure the viewport matches the new window dimensions; note that width and 
 	// height will be significantly larger than specified on retina displays.
 	glViewport(0, 0, width, height);
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	if (action == GLFW_PRESS)
+	{
+		switch (button)
+		{
+			case GLFW_MOUSE_BUTTON_LEFT: {
+				double xpos, ypos;
+				glfwGetCursorPos(window, &xpos, &ypos);
+				int width; int height;
+				glfwGetWindowSize(window, &width, &height);
+				auto domainHeight = 1.0f;
+				auto domainWidth = domainHeight / SIM_HEIGHT * SIM_WIDTH;
+				float x = xpos / width * domainWidth;
+				float y = (height - ypos) / height * domainHeight;
+				setObstacle(renderer.scene, x, y, true);
+				break;
+			}
+			case GLFW_MOUSE_BUTTON_MIDDLE:
+				break;
+			case GLFW_MOUSE_BUTTON_RIGHT:
+				break;
+			default:
+				return;
+		}
+	}
+	return;
 }
 
 // glfw: whenever the mouse moves, this callback is called
@@ -175,8 +215,16 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	lastX = xpos;
 	lastY = ypos;
 
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
 		camera.ProcessMouseMovement(xoffset, yoffset);
+		int width; int height;
+		glfwGetWindowSize(window, &width, &height);
+		auto domainHeight = 1.0f;
+		auto domainWidth = domainHeight / SIM_HEIGHT * SIM_WIDTH;
+		float x = xpos / width * domainWidth;
+		float y = (height - ypos) / height * domainHeight;
+		setObstacle(renderer.scene, x, y, false);
+	}
 }
 
 
