@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
 		//show result
 		if (frame_cnt > 0) {
 			if (frame_cnt % TIME_FRAME_CNT == 0) {
-				std::string title = "Firework   delta_time: " + std::to_string(sum_delta_time / TIME_FRAME_CNT) + "s,   fps: " + std::to_string(int(1 / (sum_delta_time / TIME_FRAME_CNT)));
+				std::string title = "Smoke   delta_time: " + std::to_string(sum_delta_time / TIME_FRAME_CNT) + "s,   fps: " + std::to_string(int(1 / (sum_delta_time / TIME_FRAME_CNT)));
 				glfwSetWindowTitle(window, title.data());
 				sum_delta_time = 0.0f;
 			}
@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
 				delta_time_output = 0.0f;
 			}
 		}
-		std::string title = "Firework   delta_time: " + std::to_string(delta_time).substr(0, 7) + "   fps: " + std::to_string(int(1 / delta_time));
+		std::string title = "Smoke   delta_time: " + std::to_string(delta_time).substr(0, 7) + "   fps: " + std::to_string(int(1 / delta_time));
 		glfwSetWindowTitle(window, title.data());
 		/* Render here */
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
